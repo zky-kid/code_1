@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"> 
+<title>菜鸟教程(runoob.com)</title>
+	<style>
+	/*
+		visibility的值：visible(可见)、hidden(隐藏但仍保留原先占的位置)
+		display的值：block/inline(可见)、none(隐藏且不保留原先占的位置)
+	*/
+	</style>
+<script src="js/jquery-3.4.1.min.js">
+</script>
+<script>
+	$(function(){ // $(document).ready(function(){
+		//alert("OK"); OK
+		$("#liFirst").click(function(){
+			$("ul li:first-child").hide();// 是彻底消失，不空留原先位置的。相当于display:none;
+		});
+		$("#first").click(function(){
+			$("ul li:first").hide();
+		});
+		$("li:first").css("color","#F00");
+		$("li:last").css("color","#F0F");
+		$("li:even").css("font-size","10px"); 
+		$("li:odd").css("font-size","25px");
+		$("li:not(:first)").css("background","#ccc");
+	});
+</script>
+</head>
+<body>
+	<p>List 1:</p>
+	<ul>
+		<li>Coffee1</li>
+		<li>Milk1</li>
+		<li>Tea1</li>
+	</ul>
+	<p>List 2:</p>
+	<ul>
+		<li>Coffee2</li>
+		<li>Milk2</li>
+		<li>Tea2</li>
+	</ul>
+
+<button id="liFirst">点我隐藏每个 &lt;ul&gt; 元素的第一个 &lt;li&gt; 元素 </button> <button id="first">点我隐藏第一个&lt;ul&gt;的第一个&lt;li&gt; 元素 </button> 
+
+</body>
+</html>
+
+<!--
+$("ul li:first") 选取第一个 <ul> 元素的第一个 <li> 元素
+$("ul li:first-child") 选取每个 <ul> 元素的第一个 <li> 元素  
+-->
