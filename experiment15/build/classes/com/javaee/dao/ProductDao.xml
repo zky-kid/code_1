@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.dao.ProductDao">
+	<!--根据id查询商品信息   parameterType="Integer" 写成int也可以 -->
+	<select id="findProductById" parameterType="Integer" resultType="product">
+		select * from t_product where id = #{id}
+	</select>
+	<select id="findAllProducts" resultType="product">
+		select * from t_product
+	</select>	
+	<select id="findProducts" parameterType="productSearchVO" resultType="product">
+		select * from t_product
+		<where>
+			<if test="null!=name and ''!=name">
+				name like concat('%', #{name}, '%')
+			</if>
+			<if test="null!=priceMin and ''!=priceMin">
+				and price &gt;= #{priceMin}
+			</if>	
+			<if test="null!=priceMax and ''!=priceMax">
+				and price &lt;= #{priceMax}
+			</if>	
+			<if test="null!=entryTimeBegin"> <!--  and ''!=entryTimeBegin" 日期型的数据不要和空串比较 否则提示：invalid comparison: java.util.Date and java.lang.String -->
+				and entryTime &gt;= #{entryTimeBegin}
+			</if>	
+			<if test="null!=entryTimeEnd"> <!--  and ''!=entryTimeEnd" -->
+				and entryTime &lt;= #{entryTimeEnd}
+			</if>
+			<if test="null!=modifyTimeBegin">
+				and modifyTime &gt;= #{modifyTimeBegin}
+			</if>	
+			<if test="null!=modifyTimeEnd">
+				and modifyTime &lt;= #{modifyTimeEnd}
+			</if>												
+		</where>
+	</select>	
+	<select id="getProductsTotal" resultType="int">
+		select count(*) from t_product
+	</select>
+	<select id="getMinAndMaxOfProductId" resultType="numbersResult"> <!-- resultType="int" 实验证明：这只能返回第一个整数，所以不行 -->
+		select min(id) minIntV, max(id) maxIntV from t_product
+	</select>		
+	<insert id="insertProduct" parameterType="product">
+		insert into t_product(name, price, entryTime) values(#{name}, #{price}, #{entryTime})
+	</insert>
+	<update id="updateProductById">
+		update t_product set name=#{name}, price=#{price}, modifyTime=now(6) where id=#{id}
+	</update>
+	<update id="updateProducts" parameterType="list">
+		<foreach item="product" collection="list" separator=";">
+		update t_product set name=#{product.name}, price=#{product.price}, modifyTime=now(6)		
+		where id=#{product.id}
+		</foreach>
+	</update>	
+	<delete id="deleteProductById" parameterType="int" >
+		delete from t_product where id=#{id}
+	</delete>	
+	<delete id="deleteProducts" parameterType="list" >  <!-- parameterType="int[]"则foreach的collection="array" -->
+		delete from t_product where id in 
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>	
+	
+</mapper>
+<!-- 
+批量执行多条SQL语句，这种方法必须在配置连接数据库url后面带一个参数 &allowMultiQueries=true，表示允许批量操作，例 
+jdbc:mysql://localhost:3306/mysqlTest?characterEncoding=utf-8&allowMultiQueries=true
+https://blog.csdn.net/ty0903csdn/article/details/81779557
+
+映射文件中SQL语句中的小于号、大于号 是不能直接用的，解决方法：
+1. <、> 分别改成&lt; 、 &gt;
+2. 加<![CDATA[ 内容1 > 内容2  ]]>    这样就可以保留原先的<、>了。
+
+ -->

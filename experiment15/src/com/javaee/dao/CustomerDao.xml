@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.dao.CustomerDao">
+	
+	<!--查询客户总数 -->
+	<select id="getCustomersCount"  resultType="int">
+		select count(*) from Customer
+	</select>
+	
+	<!--查询客户信息 -->
+	<select id="findCustomers"  resultType="customer"> <!-- 当无输入的参数时，parameterType=""是错误的，应将它直接去掉。 -->
+		select * from Customer
+	</select>
+	
+	<sql id="Base_Column_List">
+        id, userName, password, userRealName, email, contactPhone
+    </sql>
+    <!-- 根据分页数据start 和size查询数据 -->
+    <select id="findByPage" parameterType="Map" resultType="customer">
+        select
+        <include refid="Base_Column_List" />
+        from Customer
+        <if test="start!=null and size!=null">
+            limit #{start}, #{size}
+        </if>
+    </select>
+    
+	<!--根据id查询客户信息 -->
+	<select id="findCustomerById" parameterType="Integer" resultType="customer">
+		select * from Customer where id = #{id}
+	</select>
+	<select id="findCustomerByLogin" parameterType="loginVO" resultType="customer">
+		select * from Customer 
+		where userName=#{loginName} and password=#{loginPwd}
+	</select>
+	<select id="isExistSame" parameterType="fieldExistValidVO" resultType="customer">
+		select * from Customer
+		<where>
+			<choose> <!-- 类似Java中的switch case default -->
+				<when test='"1" == fieldType'>  <!--fieldType对应值是串型 '1' == fieldType  写成这样是不行的-->
+					userName=#{fieldValue}
+				</when>
+				<when test='"2" == fieldType'> 
+					email=#{fieldValue}
+				</when>	
+				<otherwise> <!-- 能执行到这说明，前面的when都不满足 -->
+					contactPhone=#{fieldValue}
+				</otherwise>		
+			</choose>	
+		</where>
+	</select>
+	
+	<!-- 会员注册  -->
+	<insert id="addCustomer" parameterType="customer">
+		insert into Customer(userName, password, userRealName, gender, email, contactPhone, address, creationTime) 
+		values(#{userName}, #{password}, #{userRealName}, #{gender}, #{email}, #{contactPhone}, #{address}, now(6))
+	</insert>
+		
+	<!-- 管理员删除会员(实际极少删除)  -->
+	<delete id="deleteCustomerById" parameterType="int" >
+		delete from Customer where id=#{id}
+	</delete>	
+	<delete id="deleteCustomers" parameterType="list" >
+		delete from Customer where id in 
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>	
+</mapper>

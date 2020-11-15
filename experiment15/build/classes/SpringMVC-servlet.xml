@@ -1,0 +1,38 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:mvc="http://www.springframework.org/schema/mvc"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:tx="http://www.springframework.org/schema/tx"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans.xsd 
+  http://www.springframework.org/schema/mvc 
+  http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+  http://www.springframework.org/schema/context 
+  http://www.springframework.org/schema/context/spring-context.xsd">
+	<!-- 配置包扫描器，扫描@Controller注解的类 -->
+	<context:component-scan base-package="com.javaee.controller" />	
+    <!-- 配置拦截器 -->
+	<mvc:interceptors>
+		<!--15.2.1 使用bean直接定义在<mvc:interceptors>下面的拦截器(称为全局拦截器)将拦截所有请求-->
+		<!--  <bean class="com.javaee.ch15.interceptor.MyInterceptor"/> -->
+		<!-- 15.3 实现用户登录权限验证 -->
+		<mvc:interceptor>
+    		<mvc:mapping path="/**" />
+    		<bean class="com.javaee.interceptor.LoginInterceptor" />    		             
+		</mvc:interceptor>		
+	</mvc:interceptors>		
+	<!-- 配置视图解析器 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- 自定义类型转换器配置 -->	
+	<bean id="myConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="com.javaee.converter.DateConverter" />
+			</set>
+		</property>
+	</bean>	
+	<mvc:annotation-driven conversion-service="myConversionService"/>		
+</beans>
