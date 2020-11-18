@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.ch17.dao.CardDao">
+	<!--根据id查询证件信息 -->
+	<select id="findCardById" parameterType="int" resultType="card">
+		select * from Card where id = #{id}
+	</select>
+	<select id="getSameCount" parameterType="fieldExistValidVO" resultType="int">
+		select count(*) from Card where cardType=#{fieldType} and cardNo=#{fieldValue}
+	</select>	
+	<select id="getOtherSameCount" parameterType="fieldExistValidVO" resultType="int">
+		select count(*) from Card where id !=#{id} and cardType=#{fieldType} and cardNo=#{fieldValue}
+	</select>	
+	<insert id="insertCard" parameterType="card" keyProperty="id" useGeneratedKeys="true">
+		insert into Card(cardType, cardNo, startDate, endDate, issuingAuthority)
+		values(#{cardType}, #{cardNo}, #{startDate}, #{endDate}, #{issuingAuthority})
+	</insert>
+	<delete id="deleteCard" parameterType="int">
+		delete from Card where id=#{id}
+	</delete>
+	<update id="updateCard" parameterType="card">
+		update Card
+		set cardType=#{cardType}, cardNo=#{cardNo},
+			startDate=#{startDate}, endDate=#{endDate}, issuingAuthority=#{issuingAuthority} 
+		where id=#{id}
+	</update>
+</mapper>
+<!-- 
+CREATE TABLE card  (
+  id int AUTO_INCREMENT primary key,
+  cardType tinyint NULL DEFAULT 0,
+  cardNo varchar(30) ,
+  startDate date,
+  endDate date,
+  issuingAuthority varchar(50),
+) 
+
+ -->

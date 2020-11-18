@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.ch17.dao.CategoryDao">
+	<!--根据id查询类别信息 -->
+	<select id="findCategoryById" parameterType="int" resultType="category">
+		select * from Category where id = #{id}
+	</select>
+	<select id="findCategories" resultType="category">
+		select * from Category order by id
+	</select>
+	<!-- 当某个类别下无商品时，才能删除 -->
+	<select id="findCategoriesWithProdcutsCount" resultMap="categoryWithProductsCountMap"> <!-- 显示类别信息时，同步显示每个类别下商品种类个数 -->
+		select C.*, count(P.categoryId) productsCount from Category C left join Product P on C.id=P.categoryId group by 1 order by id
+		<!-- 
+		MySQL中只支持from on 这种结构的外连接  左、右外连接   虚构出的一行中各列全是null。
+		select C.*, count(P.categoryId) productsCount from Product P right join Category C  on C.id=P.categoryId group by 1 order by id
+		 -->
+	</select> 
+	<resultMap id="categoryWithProductsCountMap" type="categoryWithProductsCount">
+		<id property="category.id" column="id"/>
+		<result property="category.name" column="name"/>
+		<result property="productsCount" column="productsCount"/>
+	</resultMap>
+	<insert id="insertCategory" parameterType="category">
+		insert into Category(name)
+		values(#{name})
+	</insert>
+	<update id="updateCategory" parameterType="category">
+		update Category
+		set name=#{name}
+		where id=#{id}
+	</update>
+	<delete id="deleteCategory" parameterType="int">
+		delete from Category where id=#{id}
+	</delete>		
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.ch17.dao.ProductDao">
+	
+	<select id="findProductById" parameterType="int" resultMap="productCategoryMap">  <!-- resultType、resultMap只能出现一个 -->
+		select Product.*, Category.name as categoryName from Product, Category where Product.categoryId = Category.id and Product.id= #{id}
+	</select>
+	<select id="findProducts" resultType="product"  resultMap="productCategoryMap">
+		select Product.*, Category.name as categoryName from Product, Category where Product.categoryId = Category.id order by Product.id
+	</select>
+	<resultMap type="product" id="productCategoryMap">  <!-- 要交代清楚查到的结果集中的每个列对应拟封装的对象的哪个属性。 -->
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="price" column="price"/>		
+		<result property="entryTime" column="entryTime"/>
+		<result property="modifyTime" column="modifyTime"/>
+		<association property="category" javaType="category">
+			<id property="id" column="categoryId"/>
+			<result property="name" column="categoryName"/>
+		</association>
+	</resultMap>
+	<insert id="insertProduct" parameterType="product"> <!-- now(6) -->
+		insert into Product(name, price, categoryId, entryTime, modifyTime)
+		values(#{name}, #{price}, #{category.id}, #{entryTime}, null)
+	</insert>
+	<update id="updateProduct" parameterType="product">  <!--为增强实用性，更新商品时也允许修改modifyTime这个字段。 modifyTime=now(6)  -->
+		update Product
+		set name=#{name}, price=#{price}, categoryId=#{category.id}, modifyTime=#{modifyTime}
+		where id=#{id}
+	</update>
+	<delete id="deleteProduct" parameterType="int">
+		delete from Product where id=#{id}
+	</delete>		
+</mapper>
+
+<!-- 
+create table Product(
+  id int auto_increment primary key,
+  name varchar(50),
+  price decimal(10, 2),
+  categoryId int,
+  entryTime datetime(6),
+  modifyTime datetime(6) default now(6),
+  foreign key(categoryId) references Category(id)
+)
+
+ -->

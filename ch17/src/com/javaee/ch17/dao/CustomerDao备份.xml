@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.ch17.dao.CustomerDao">
+	<!--根据id查询客户信息 -->
+	<select id="findCustomerById" parameterType="Integer" resultType="customer">
+		select * from Customer where id = #{id}
+	</select>
+	<select id="findCustomerByUserName" parameterType="string" resultType="customer">
+		select * from Customer where userName = #{userName}
+	</select>	
+	<select id="findAllCustomers" resultType="customer"> <!-- 当无参数时，直接去掉parameterType而不是留着让它为"" -->
+		select * from Customer
+	</select>	
+	<select id="findSomeCustomers" resultType="customer" parameterType="customer"> <!-- 模糊查询时，查询条件不能恰好被封装在customer对象，就要新建一个vo -->
+		select * from Customer
+		<where>
+			<if test="userName!=null and userName !=''">userName like concat('%', #{userName}, '%')</if>
+			<if test="userRealName!=null and userRealName !=''">
+				and userRealName like concat('%', #{userRealName}, '%')
+			</if>
+			<if test="email!=null and email !=''">
+				and email like concat('%', #{email}, '%')
+			</if>
+			<if test="contactPhone!=null and contactPhone !=''">
+				and contactPhone like concat('%', #{contactPhone}, '%')
+			</if>
+			<if test="address!=null and address !=''">
+				and address like concat('%', #{address}, '%')
+			</if>									
+		</where> 
+	</select>	
+	<insert id="insertCustomer" parameterType="customer">
+		insert into Customer(userName, password, userRealName, gender, email, contactPhone, address, memo )
+		values (#{userName}, #{password}, #{userRealName}, #{gender}, #{email}, #{contactPhone}, #{address}, #{memo})
+	</insert>
+	<update id="updateCustomer" parameterType="customer">
+		update Customer
+		set password=#{password}, userRealName=#{userRealName}, gender=#{gender}, email=#{email}, contactPhone=#{contactPhone}, address=#{address}, memo=#{memo}
+		where id=#{id}
+	</update>
+	<delete id="deleteCustomer" parameterType="int">
+		delete from Customer where id=#{id}
+	</delete>		
+</mapper>

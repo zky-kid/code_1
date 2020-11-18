@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.javaee.ch17.dao.CustomerDao">
+	<!--根据id查询客户信息 -->
+	<select id="findCustomerById" parameterType="int" resultMap="customerCardMap">
+		select Customer.*, Card.* from Customer, Card where cardId = Card.id and Customer.id = #{id}
+	</select>
+	<!--根据用户名查询客户信息 -->
+	<select id="findCustomerByUserName" parameterType="string" resultMap="customerCardMap">
+		select Customer.*, Card.* from Customer, Card where cardId = Card.id and userName = #{userName}
+	</select>	
+	<select id="findCustomers" resultMap="customerCardMap">
+		select Customer.*, Card.* from Customer, Card where cardId = Card.id
+	</select>
+    <select id="findByPage" parameterType="Map" resultMap="customerCardMap">
+        select Customer.*, Card.* from Customer, Card where cardId = Card.id
+        <if test="start!=null and size!=null">
+            limit #{start}, #{size}
+        </if>
+    </select>
+    <select id="getCustomersCount" resultType="int">
+    	select count(*) from Customer
+    </select>	
+	<select id="findSomeCustomers" parameterType="customer" resultMap="customerCardMap">
+		select Customer.*, Card.* from Customer, Card 
+		<where>
+			cardId = Card.id
+			<if test="userName !=null and userName!=''">  <!-- 且：不能写成&& -->
+				and userName like concat('%', #{userName}, '%')
+			</if>
+			<if test="userRealName !=null and userRealName!=''"> <!-- 除第一个开头的and可省，下面的and不应省略。 -->
+				and userRealName  like concat('%', #{userRealName}, '%')
+			</if>	
+			<if test="email !=null and email!=''">
+				and email  like concat('%', #{email}, '%')
+			</if>	
+			<if test="contactPhone !=null and contactPhone!=''">
+				and contactPhone  like concat('%', #{contactPhone}, '%')
+			</if>
+			<if test="address !=null and address!=''">
+				and address  like concat('%', #{address}, '%')
+			</if>										
+		</where>
+	</select>
+	
+	<resultMap type="customer" id="customerCardMap">
+		<id property="id" column="id"/>
+		<result property="userName" column="userName"/>
+		<result property="password" column="password"/>
+		<result property="userRealName" column="userRealName"/>
+		<result property="gender" column="gender"/>
+		<result property="email" column="email"/>
+		<result property="contactPhone" column="contactPhone"/>
+		<result property="address" column="address"/>
+		<result property="memo" column="memo"/>
+		<result property="creationTime" column="creationTime"/>
+		<association property="card" javaType="card">
+			<id  property="id" column="cardId"/>
+			<result property="cardType" column="cardType"/>
+			<result property="cardNo" column="cardNo"/>
+			<result property="startDate" column="startDate"/>
+			<result property="endDate" column="endDate"/>
+			<result property="issuingAuthority" column="issuingAuthority"/>
+		</association>		
+	</resultMap>
+	<select id="getSameCount" parameterType="fieldExistValidVO" resultType="int">
+		select count(*) from Customer
+		<where>
+			<choose> <!-- 类似Java中的switch case default -->
+				<when test='"1" == fieldType'>  <!--fieldType对应值是串型 '1' == fieldType  写成这样是不行的-->
+					userName=#{fieldValue}
+				</when>
+				<when test='"2" == fieldType'> 
+					email=#{fieldValue}
+				</when>	
+				<otherwise> <!-- 能执行到这说明，前面的when都不满足 -->
+					contactPhone=#{fieldValue}
+				</otherwise>		
+			</choose>	
+		</where>
+	</select>	
+	<select id="getOtherSameCount" parameterType="fieldExistValidVO" resultType="int">
+		select count(*) from Customer
+		<where>
+			id !=#{id} and 
+			<choose> <!-- 类似Java中的switch case default -->
+				<when test='"2" == fieldType'>  <!--fieldType对应值是串型 '1' == fieldType  写成这样是不行的-->
+					email=#{fieldValue}
+				</when>	
+				<otherwise> <!-- 能执行到这说明，前面的when都不满足 -->
+					contactPhone=#{fieldValue}
+				</otherwise>		
+			</choose>	
+		</where>
+	</select>			
+	<insert id="insertCustomer" parameterType="customer">
+		insert into Customer(userName, password, userRealName, gender, cardId, email, contactPhone, address, memo)
+		values(#{userName}, #{password}, #{userRealName}, #{gender}, #{card.id}, #{email}, #{contactPhone}, #{address}, #{memo})
+	</insert>
+	<update id="updateCustomer" parameterType="customer">
+		update Customer
+		set password=#{password}, userRealName=#{userRealName}, gender=#{gender}, email=#{email}, contactPhone=#{contactPhone}, address=#{address}, memo=#{memo}
+		where id=#{id}
+	</update>
+	<delete id="deleteCustomer" parameterType="int">
+		delete from Customer where id=#{id}
+	</delete>		
+</mapper>
